@@ -1,6 +1,4 @@
 import { useState , useCallback , useEffect, useRef} from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
@@ -11,7 +9,8 @@ function App() {
   const [charAllowed , setCharAllowed] = useState(false);
   const [password, setPassword] = useState("")
 
-  // useref Hook
+  // useRef Hook : kisi bhi element ka reference ka lene k liye is hook ka use kiya jata h 
+  // isko 1 variable m estore knra pdta h use krne se phle
   const passwordRef = useRef(null);
 
 
@@ -19,6 +18,11 @@ function App() {
   // useCallback() : its a react hook that lets you cache a function definition between re-render
   // Syntex : const cachedFn = useCallback(Fn, dependencies)
   // dependencies : In React, dependencies are values that determine when a hook (like useEffect, useCallback, or useMemo) should re-run or recompute its logic.
+  // Intution for using useCallback() : hme password generator function ko bar bar re-run krna pd rha h on basis of Length, charAllowed, numberAllowed
+  // so useCallabck 1 optimized hook jo function ko cache kr leta h jo part reuse ho skta h function ka use use kr leta or kuj new add krna ho use add kr deta h
+  // useCallback memoization ka bhi kaam kr rha h
+
+  // Or ye function ko memoize krne k liye h Optimize krne k liye h (function ko cache krne k liye)
   const passwordGenerator = useCallback( () => {
     let pass = "";
     let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -27,24 +31,31 @@ function App() {
     if (charAllowed) str += "~!@#$%^&-_+=[]*(){}`";
 
     for (let index = 1; index <= length; index++) {
-            let char = Math.floor(Math.random() * str.length + 1);
-            pass += str.charAt(char);
+            let charIndex = Math.floor(Math.random() * str.length + 1);
+            pass += str.charAt(charIndex);
     }
 
     setPassword(pass);
 
-  } , [length, numberAllowed, charAllowed, setPassword] );
+  } , [length, numberAllowed, charAllowed, setPassword] ); // yha hm optimize ki baat kr rhe h. In dependencies me kuch bhi change ho to function ko re-run kr k memoize kro
+
+
+
+  // ye function ko RUN krne k liye h
+  // when page is load it run first time
+  useEffect( () => {
+   passwordGenerator();
+  } , [length, numberAllowed, charAllowed, passwordGenerator] ); // inme se koi nhi dependencies me se koi bhi change to to function ko re-run kro
+
+
 
 
   const copyPasswordToClipboard = useCallback( () => {
     passwordRef.current?.select();
     passwordRef.current?.setSelectionRange(0,10);
-    window.navigator.clipboard.writeText(password);
+    window.navigator.clipboard.writeText(password); // password ko clipboard pr write krne k liye use kiya h
   } , [password] )
 
- useEffect( () => {
-  passwordGenerator();
- } , [length, numberAllowed, charAllowed, passwordGenerator] );
 
 
   return (
@@ -58,16 +69,16 @@ function App() {
 
         <div className='flex text-sm gap-x-2'>
           <div className='flex items-center gap-x-1'>
-            <input onChange={ (e) => setLength(e.target.value) } type="range" min={6} max={100} className='cursor-pointer'/>
+            <input onChange={ (e) => setLength(e.target.value) } type="range" min={6} max={100} value = {length} className='cursor-pointer'/>
             <label >Length : {length}</label>
           </div>
 
           <div className='flex items-center gap-x-1'>
             <input type="checkbox" defaultChecked={numberAllowed} id='numberInput' 
-                    onChange={ () => { setNumberAllowed(prev => !prev)  } }/>
+                    onChange={ () => setNumberAllowed(prev => !prev) }/>
             <label>Numbers</label>
             <input type="checkbox" defaultChecked={charAllowed} id='charInput' 
-                    onChange={ () => { setCharAllowed(prev => !prev)  } }/>
+                    onChange={ () => setCharAllowed(prev => !prev)  }/>
             <label>Characters</label>
           </div>
 
