@@ -42,7 +42,7 @@ function App() {
 
 
   // ye function ko RUN krne k liye h
-  // when page is load it run first time
+  // when page is load it run first
   useEffect( () => {
    passwordGenerator();
   } , [length, numberAllowed, charAllowed, passwordGenerator] ); // inme se koi nhi dependencies me se koi bhi change to to function ko re-run kro
@@ -51,9 +51,20 @@ function App() {
 
 
   const copyPasswordToClipboard = useCallback( () => {
-    passwordRef.current?.select();
-    passwordRef.current?.setSelectionRange(0,10);
-    window.navigator.clipboard.writeText(password); // password ko clipboard pr write krne k liye use kiya h
+    // passwordRef.current?.select();
+    // passwordRef.current?.setSelectionRange(0,10);
+    // window.navigator.clipboard.writeText(password); // password ko clipboard pr write krne k liye use kiya h
+
+    if (passwordRef.current) {
+      // Set selection range for the first 10 characters
+      passwordRef.current?.select();
+      passwordRef.current.setSelectionRange(0, 10);
+      
+      // Copy the selected text to clipboard
+      const selectedText = passwordRef.current.value.substring(0, 10);
+      window.navigator.clipboard.writeText(selectedText);
+  }
+
   } , [password] )
 
 
@@ -83,9 +94,11 @@ function App() {
           </div>
 
         </div>
-
+        console.log({password});
       </div>
-    
+
+      
+      
   )
 }
 
